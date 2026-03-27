@@ -100,3 +100,60 @@ body {
     height: 100vh;
     background: #e5e3df; /* Placeholder color while map tiles load */
 }
+#search-bar {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+#filter-container {
+    margin-top: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.filter-btn {
+    padding: 4px 8px;
+    font-size: 0.7rem;
+    border: 1px solid #007bff;
+    background: white;
+    color: #007bff;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.filter-btn.active {
+    background: #007bff;
+    color: white;
+}
+#filter-container {
+    margin-top: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.filter-btn {
+    padding: 5px 10px;
+    font-size: 0.75rem;
+    border: 1px solid #007bff;
+    background: white;
+    color: #007bff;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 600;
+}
+
+.filter-btn:hover {
+    background: #e7f1ff;
+}
+
+.filter-btn.active {
+    background: #007bff;
+    color: white;
+}
