@@ -1,0 +1,75 @@
+body, html { margin: 0; padding: 0; height: 100%; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+#container { display: flex; height: 100vh; }
+
+#sidebar {
+    width: 380px;
+    background: #ffffff;
+    overflow-y: auto;
+    border-right: 1px solid #eee;
+    display: flex;
+    flex-direction: column;
+}
+
+header {
+    padding: 25px;
+    background: #2c3e50;
+    color: white;
+}
+
+header h1 { margin: 0; font-size: 1.4rem; }
+header p { margin: 10px 0 0; font-size: 0.9rem; opacity: 0.8; }
+
+#company-list { padding: 15px; }
+
+.company-card {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    margin-bottom: 12px;
+    background: #fdfdfd;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 1px solid #eee;
+}
+
+.company-card:hover { 
+    border-color: #2ecc71; 
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+/* Placeholder for when you don't have a logo yet */
+.card-logo-placeholder {
+    width: 50px;
+    height: 50px;
+    background: #ecf0f1;
+    color: #7f8c8d;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 1.2rem;
+    margin-right: 15px;
+    flex-shrink: 0;
+}
+
+.card-info h3 { margin: 0; font-size: 1.05rem; color: #2c3e50; }
+.card-info p { margin: 3px 0; font-size: 0.85rem; color: #7f8c8d; }
+
+.sector-tag {
+    display: inline-block;
+    background: #e8f4fd;
+    color: #3498db;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem !important;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+#map { flex-grow: 1; z-index: 1; }
+
+.map-popup { font-size: 0.9rem; line-height: 1.4; }
+.map-popup hr { margin: 8px 0; border: 0; border-top: 1px solid #eee; }
