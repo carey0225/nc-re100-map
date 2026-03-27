@@ -1,64 +1,57 @@
-// 1. Initialize the Map centered on North Carolina
-const map = L.map('map').setView([35.7596, -79.0193], 7);
+// 1. Initialize the Map
+// Centered on Raleigh, NC with a zoom level of 7
+var map = L.map('map').setView([35.7796, -78.6382], 7);
 
-// 2. Add a clean Light-themed Basemap (CartoDB Positron)
-L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+// 2. Add the Map Tiles (The actual background map)
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
     attribution: '© OpenStreetMap contributors'
 }).addTo(map);
 
-const companyList = document.getElementById('company-list');
-
-// 3. Load the data from your companies.json
+// 3. Load the Company Data
 fetch('companies.json')
     .then(response => response.json())
     .then(data => {
+        const listContainer = document.getElementById('company-list');
+
         data.forEach(item => {
-            // Add Marker to Map using Latitude and Longitude
-            const marker = L.circleMarker([item.Latitude, item.Longitude], {
-                radius: 10,
-                fillColor: item.Status === "Achieved" ? "#2ecc71" : "#3498db", // Green if achieved, Blue if in progress
-                color: "#fff",
-                weight: 2,
-                opacity: 1,
-                fillOpacity: 0.9
-            }).addTo(map);
-
-            // Popup content using your specific keys
-            const popupContent = `
-                <div class="map-popup">
+            // A. Create the Marker on the Map
+            // Assumes your JSON has "Latitude" and "Longitude" fields
+            if (item.Latitude && item.Longitude) {
+                var marker = L.marker([item.Latitude, item.Longitude]).addTo(map);
+                
+                // Add a popup that opens when you click the marker
+                marker.bindPopup(`
                     <strong>${item.Company}</strong><br>
-                    <small>${item.Sector}</small><br>
-                    <hr>
-                    ${item["Primary Strategy / Plan"]}
-                </div>
-            `;
-            marker.bindPopup(popupContent);
+                    Goal: ${item.Goal}<br>
+                    <small>${item.Sector}</small>
+                `);
+            }
 
-            // 4. Create Sidebar Card
+            // B. Create the Sidebar Card
             const card = document.createElement('div');
             card.className = 'company-card';
             
-            // Note: If you have a folder of logos named by ID (e.g., 1.png), 
-            // you can change the src to `logos/${item.ID}.png`
+            // Note: If your logos are in a folder called "images", the path below works.
+            // If the images aren't showing, check if your folder is capitalized (Images vs images).
             card.innerHTML = `
-                <div class="card-logo-placeholder">${item.Company.charAt(0)}</div>
-                <div class="card-info">
-                    <h3>${item.Company}</h3>
-                    <p><strong>Goal:</strong> ${item["Goal Year"]}</p>
-                    <p class="sector-tag">${item.Sector}</p>
+                <img src="images/${item.Logo}" class="company-logo" alt="${item.Company}" onerror="this.src='https://via.placeholder.com/50?text=${item.Company.charAt(0)}'">
+                <div class="company-info">
+                    <h4>${item.Company}</h4>
+                    <p>Goal: ${item.Goal}</p>
+                    <span class="sector-tag">${item.Sector}</span>
                 </div>
             `;
 
-            // Click event to "Fly" to the location and open popup
+            // C. Add Interactivity: Click card to fly to map location
             card.addEventListener('click', () => {
-                map.flyTo([item.Latitude, item.Longitude], 11, {
-                    duration: 1.5
-                });
-                // Delay opening popup slightly for the animation to finish
-                setTimeout(() => marker.openPopup(), 1200);
+                if (item.Latitude && item.Longitude) {
+                    map.flyTo([item.Latitude, item.Longitude], 12);
+                    marker.openPopup();
+                }
             });
 
-            companyList.appendChild(card);
+            listContainer.appendChild(card);
         });
     })
-    .catch(err => console.error("Error loading JSON:", err));
+    .catch(error => console.error('Error loading the JSON data:', error));
