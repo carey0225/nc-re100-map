@@ -10,6 +10,9 @@ var markerLayer = L.layerGroup().addTo(map);
 fetch('companies.json')
     .then(response => response.json())
     .then(data => {
+        console.log("Data Loaded:", data.length, "companies found.");
+
+        // 1. Sort Alphabetically
         data.sort((a, b) => a.Company.localeCompare(b.Company));
 
         const listContainer = document.getElementById('company-list');
@@ -18,8 +21,9 @@ fetch('companies.json')
 
         let currentSector = 'All';
 
-        // A. GENERATE FILTER BUTTONS DYNAMICALLY
-        const sectors = ['All', ...new Set(data.map(item => item.Sector))];
+        // 2. Generate Filter Buttons
+        const uniqueSectors = [...new Set(data.map(item => item.Sector.trim()))];
+        const sectors = ['All', ...uniqueSectors];
         
         sectors.forEach(sector => {
             const btn = document.createElement('button');
@@ -30,20 +34,25 @@ fetch('companies.json')
                 document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 currentSector = sector;
+                console.log("Sector Filter Changed to:", currentSector);
                 applyFilters();
             });
             filterContainer.appendChild(btn);
         });
 
-        // B. RENDER FUNCTION
+        // 3. Render Function
         function renderDisplay(filteredData) {
             listContainer.innerHTML = '';
             markerLayer.clearLayers();
 
-            filteredData.forEach(item => {
-                const markerColor = item.Goal === "Achieved" ? "#2ecc71" : "#3498db";
+            if (filteredData.length === 0) {
+                listContainer.innerHTML = '<p style="padding: 20px; color: #666;">No companies match your search or filter.</p>';
+                return;
+            }
 
+            filteredData.forEach(item => {
                 if (item.Latitude && item.Longitude) {
+                    const markerColor = item.Goal === "Achieved" ? "#2ecc71" : "#3498db";
                     const marker = L.circleMarker([item.Latitude, item.Longitude], {
                         radius: 8,
                         fillColor: markerColor,
@@ -84,17 +93,26 @@ fetch('companies.json')
             });
         }
 
-        // C. COMBINED FILTER LOGIC (Search + Sector)
+        // 4. Combined Filter Logic
         function applyFilters() {
-            const searchTerm = searchBar.value.toLowerCase();
+            const searchTerm = searchBar.value.toLowerCase().trim();
+            
             const filtered = data.filter(c => {
                 const matchesSearch = c.Company.toLowerCase().includes(searchTerm);
-                const matchesSector = currentSector === 'All' || c.Sector === currentSector;
+                // We use .trim() to prevent "Technology " (with a space) from failing to match "Technology"
+                const matchesSector = currentSector === 'All' || c.Sector.trim() === currentSector;
                 return matchesSearch && matchesSector;
             });
+            
+            console.log(`Filtering: Search="${searchTerm}", Sector="${currentSector}" -> Found: ${filtered.length}`);
             renderDisplay(filtered);
         }
 
         searchBar.addEventListener('input', applyFilters);
-        renderDisplay(data); // Initial load
+        
+        // Initial render
+        renderDisplay(data);
+    })
+    .catch(err => {
+        console.error("Critical Error loading JSON:", err);
     });
