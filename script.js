@@ -10,19 +10,20 @@ var markerLayer = L.layerGroup().addTo(map);
 fetch('companies.json')
     .then(response => response.json())
     .then(data => {
-        // Sort Alphabetically
-        data.sort((a, b) => a.Company.localeCompare(b.Company));
+        // Sort everything A-Z right at the start
+        data.sort((a, b) => (a.Company || "").localeCompare(b.Company || ""));
 
         const listContainer = document.getElementById('company-list');
         const searchBar = document.getElementById('search-bar');
         const filterContainer = document.getElementById('filter-container');
 
-        let currentSector = 'All';
+        let currentSector = 'ALL';
 
-        // A. GENERATE FILTER BUTTONS
+        // A. CREATE BUTTONS
         const uniqueSectors = [...new Set(data.map(item => item.Sector.trim()))];
         const sectors = ['All', ...uniqueSectors];
         
+        filterContainer.innerHTML = ''; // Clear old buttons
         sectors.forEach(sector => {
             const btn = document.createElement('button');
             btn.className = 'filter-btn' + (sector === 'All' ? ' active' : '');
@@ -31,19 +32,19 @@ fetch('companies.json')
             btn.addEventListener('click', () => {
                 document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
-                currentSector = sector;
+                currentSector = sector.toUpperCase().trim();
                 applyFilters();
             });
             filterContainer.appendChild(btn);
         });
 
-        // B. RENDER FUNCTION
+        // B. THE RENDERER
         function renderDisplay(filteredData) {
             listContainer.innerHTML = '';
             markerLayer.clearLayers();
 
             if (filteredData.length === 0) {
-                listContainer.innerHTML = '<p style="padding: 20px; color: #666;">No companies match these filters.</p>';
+                listContainer.innerHTML = `<p style="padding:20px;">No results for "${currentSector}"</p>`;
                 return;
             }
 
@@ -51,12 +52,7 @@ fetch('companies.json')
                 if (item.Latitude && item.Longitude) {
                     const markerColor = item.Goal === "Achieved" ? "#2ecc71" : "#3498db";
                     const marker = L.circleMarker([item.Latitude, item.Longitude], {
-                        radius: 8,
-                        fillColor: markerColor,
-                        color: "#fff",
-                        weight: 2,
-                        opacity: 1,
-                        fillOpacity: 0.8
+                        radius: 8, fillColor: markerColor, color: "#fff", weight: 2, fillOpacity: 0.8
                     });
 
                     marker.bindPopup(`<strong>${item.Company}</strong><br>Goal: ${item.Goal}`);
@@ -70,8 +66,8 @@ fetch('companies.json')
                             <h4>${item.Company}</h4>
                             <p>Goal: ${item.Goal}</p>
                             <span class="sector-tag">${item.Sector}</span>
-                        </div>
-                    `;
+                        </div>`;
+                    
                     card.addEventListener('click', () => {
                         map.flyTo([item.Latitude, item.Longitude], 12);
                         marker.openPopup();
@@ -81,24 +77,20 @@ fetch('companies.json')
             });
         }
 
-        // C. THE "FIX-IT" FILTER LOGIC
+        // C. THE FILTER (Case Insensitive & Space Insensitive)
         function applyFilters() {
             const searchTerm = searchBar.value.toLowerCase().trim();
             
             const filtered = data.filter(c => {
-                const companyName = c.Company.toLowerCase();
-                const sectorName = c.Sector.toLowerCase().trim();
-                const selectedSector = currentSector.toLowerCase().trim();
-
-                const matchesSearch = companyName.includes(searchTerm);
-                const matchesSector = currentSector === 'All' || sectorName === selectedSector;
-                
-                return matchesSearch && matchesSector;
+                const companyMatch = c.Company.toLowerCase().includes(searchTerm);
+                const sectorFromData = c.Sector.toUpperCase().trim();
+                const sectorMatch = (currentSector === 'ALL' || sectorFromData === currentSector);
+                return companyMatch && sectorMatch;
             });
             
             renderDisplay(filtered);
         }
 
         searchBar.addEventListener('input', applyFilters);
-        renderDisplay(data); 
+        renderDisplay(data); // Initial view
     });
