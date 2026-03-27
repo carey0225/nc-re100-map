@@ -35,7 +35,7 @@ fetch('companies.json')
             // Note: If your logos are in a folder called "images", the path below works.
             // If the images aren't showing, check if your folder is capitalized (Images vs images).
             card.innerHTML = `
-                <img src="images/${item.Logo}" class="company-logo" alt="${item.Company}" onerror="this.src='https://via.placeholder.com/50?text=${item.Company.charAt(0)}'">
+                <img src="images/${item.ID}.png" class="company-logo" alt="${item.Company}" onerror="this.src='https://via.placeholder.com/50?text=${item.Company.charAt(0)}'">
                 <div class="company-info">
                     <h4>${item.Company}</h4>
                     <p>Goal: ${item.Goal}</p>
