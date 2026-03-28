@@ -1,20 +1,19 @@
-// 1. Initialize the Map centered on North Carolina
+// 1. Initialize Map with NCSEA-appropriate zoom and center
 var map = L.map('map').setView([35.7796, -78.6382], 7);
 
-// 2. Add the Map Tiles
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+// 2. Add Map Tiles (Light Gray Canvas works best for professional branding)
+L.tileLayer('https://{s}.tile.openstreetmap.org/light_all/{z}/{x}/{y}.png', {
     maxZoom: 19,
     attribution: '© OpenStreetMap contributors'
 }).addTo(map);
 
-// Layer group to manage markers during filtering
 var markerLayer = L.layerGroup().addTo(map);
 
-// 3. Load the Company Data
+// 3. Load and Process Data
 fetch('companies.json')
     .then(response => response.json())
     .then(data => {
-        // A. PRE-SORT DATA ALPHABETICALLY
+        // Sort Alphabetically by Company Name
         data.sort((a, b) => (a.Company || "").localeCompare(b.Company || ""));
 
         const listContainer = document.getElementById('company-list');
@@ -24,7 +23,7 @@ fetch('companies.json')
 
         let currentSector = 'ALL';
 
-        // B. GENERATE FILTER BUTTONS DYNAMICALLY
+        // A. GENERATE NCSEA BRANDED FILTER BUTTONS
         const uniqueSectors = [...new Set(data.map(item => item.Sector.trim()))];
         const sectors = ['All', ...uniqueSectors];
         
@@ -34,83 +33,90 @@ fetch('companies.json')
             btn.className = 'filter-btn' + (sector === 'All' ? ' active' : '');
             btn.innerText = sector;
             
-            btn.addEventListener('click', () => {
+            btn.onclick = () => {
                 document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 currentSector = sector.toUpperCase().trim();
                 applyFilters();
-            });
+            };
             filterContainer.appendChild(btn);
         });
 
-        // C. RENDER FUNCTION (The "Engine")
+        // B. RENDER FUNCTION (Professional Dashboard UI)
         function renderDisplay(filteredData) {
             listContainer.innerHTML = '';
             markerLayer.clearLayers();
 
             if (filteredData.length === 0) {
-                listContainer.innerHTML = '<p style="padding: 20px; color: #666;">No companies match these filters.</p>';
+                listContainer.innerHTML = '<p style="padding: 20px; text-align: center;">No partners found matching those criteria.</p>';
                 return;
             }
 
             filteredData.forEach(item => {
                 if (item.Latitude && item.Longitude) {
-                    // Color Logic: Green for Achieved, Blue for Goal Set
-                    const isAchieved = item.Goal && item.Goal.toLowerCase().includes("achieved");
-                    const markerColor = isAchieved ? "#2ecc71" : "#3498db";
+                    // NCSEA BRANDED COLORS
+                    // Green = Achieved, Blue = In Progress
+                    const isAchieved = (item.Goal || "").toLowerCase().includes("achieved");
+                    const markerColor = isAchieved ? "#98bf3c" : "#007dc3"; 
 
                     const marker = L.circleMarker([item.Latitude, item.Longitude], {
-                        radius: 8,
+                        radius: 9,
                         fillColor: markerColor,
-                        color: "#fff",
+                        color: "#ffffff",
                         weight: 2,
                         opacity: 1,
-                        fillOpacity: 0.8
+                        fillOpacity: 0.9
                     });
 
+                    // Professional Popup using Strategy Data
                     marker.bindPopup(`
-                        <div style="text-align:center; font-family: sans-serif;">
-                            <img src="images/${item.ID}.png" style="width:50px; margin-bottom:5px;" onerror="this.style.display='none'"><br>
-                            <strong>${item.Company}</strong><br>
-                            Goal: ${item.Goal}
+                        <div style="font-family: 'Inter', sans-serif; min-width: 150px;">
+                            <h3 style="margin: 0 0 5px 0; color: #254c91; font-size: 14px;">${item.Company}</h3>
+                            <div style="font-size: 12px; color: #636566;">
+                                <b>Goal:</b> ${item.Goal}<br>
+                                <b>Plan:</b> ${item['Primary Strategy / Plan'] || 'Sustainability Strategy'}
+                            </div>
                         </div>
                     `);
 
                     marker.addTo(markerLayer);
 
-                    // Create Sidebar Card
+                    // Create Sidebar Card with Strategy Badge
+                    const companyId = item.ID || item.id;
                     const card = document.createElement('div');
                     card.className = 'company-card';
                     card.innerHTML = `
-                        <img src="images/${item.ID}.png" class="company-logo" alt="${item.Company}" onerror="this.src='https://via.placeholder.com/50?text=${item.Company.charAt(0)}'">
-                        <div class="company-info">
-                            <h4>${item.Company}</h4>
-                            <p>Goal: ${item.Goal}</p>
-                            <span class="sector-tag">${item.Sector}</span>
+                        <div style="display: flex; align-items: center; gap: 15px;">
+                            <img src="images/${companyId}.png" class="company-logo" alt="${item.Company}" 
+                                 onerror="this.src='https://via.placeholder.com/50?text=${item.Company.charAt(0)}'">
+                            <div class="company-info">
+                                <h4>${item.Company}</h4>
+                                <p><strong>Goal:</strong> ${item.Goal}</p>
+                                <div class="strategy-tag">${item['Primary Strategy / Plan'] || 'Clean Energy Plan'}</div>
+                            </div>
                         </div>
                     `;
 
-                    card.addEventListener('click', () => {
-                        map.flyTo([item.Latitude, item.Longitude], 12);
+                    card.onclick = () => {
+                        map.flyTo([item.Latitude, item.Longitude], 13, { animate: true, duration: 1.5 });
                         marker.openPopup();
-                    });
+                    };
 
                     listContainer.appendChild(card);
                 }
             });
         }
 
-        // D. FILTER LOGIC
+        // C. FILTER LOGIC (Combined Search + Sector)
         function applyFilters() {
             const searchTerm = searchBar.value.toLowerCase().trim();
             
             const filtered = data.filter(c => {
                 const companyName = (c.Company || "").toLowerCase();
                 const sectorFromData = (c.Sector || "").toUpperCase().trim();
-                const selectedSector = currentSector;
-
+                
                 const matchesSearch = companyName.includes(searchTerm);
-                const matchesSector = selectedSector === 'ALL' || sectorFromData === selectedSector;
+                const matchesSector = (currentSector === 'ALL' || sectorFromData === currentSector);
                 
                 return matchesSearch && matchesSector;
             });
@@ -118,27 +124,21 @@ fetch('companies.json')
             renderDisplay(filtered);
         }
 
-        // E. EVENT LISTENERS
-        searchBar.addEventListener('input', applyFilters);
+        // D. INTERACTION LISTENERS
+        searchBar.oninput = applyFilters;
 
-        // F. RESET BUTTON LOGIC
-        resetBtn.addEventListener('click', () => {
-            searchBar.value = ''; // Clear search
-            currentSector = 'ALL'; // Reset sector
-            
-            // Reset Button Styling
+        resetBtn.onclick = () => {
+            searchBar.value = '';
+            currentSector = 'ALL';
             document.querySelectorAll('.filter-btn').forEach(b => {
                 b.classList.remove('active');
                 if (b.innerText === 'All') b.classList.add('active');
             });
-
-            // Reset Map View
             map.flyTo([35.7796, -78.6382], 7);
-            
             applyFilters();
-        });
+        };
 
-        // Initial Load
+        // Initial render
         renderDisplay(data);
     })
-    .catch(err => console.error("Critical Error loading JSON:", err));
+    .catch(err => console.error("Error initializing NCSEA Map:", err));
