@@ -9,37 +9,33 @@
     --bg-light: #f8f9fa;
 }
 
-/* 1. Prevent the whole page from scrolling */
-body {
+/* Force the body to take up the full screen without scrolling */
+html, body {
     margin: 0;
     padding: 0;
-    font-family: 'Helvetica', Arial, sans-serif; /* NCSEA Web Typeface [cite: 100] */
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    font-family: 'Helvetica', Arial, sans-serif;
     display: flex;
-    height: 100vh;
-    width: 100vw;
-    overflow: hidden; 
 }
 
-/* 2. Sidebar with fixed width */
+/* Sidebar Styling */
 #sidebar {
     width: 380px;
     min-width: 380px;
+    height: 100vh;
     background: var(--white);
     display: flex;
     flex-direction: column;
     box-shadow: 4px 0 15px rgba(0,0,0,0.1);
-    z-index: 1000;
+    z-index: 10; /* Lower than map popups, higher than map tiles */
 }
 
 .sidebar-header {
     padding: 20px;
     background: var(--ncsea-blue);
     color: var(--white);
-}
-
-.sidebar-header h2 {
-    margin: 0 0 15px 0;
-    font-size: 1.4rem;
 }
 
 #search-bar {
@@ -50,14 +46,34 @@ body {
     margin-bottom: 10px;
 }
 
-/* 3. The scrollable list area */
+#filter-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.filter-btn {
+    background: rgba(255,255,255,0.2);
+    border: 1px solid rgba(255,255,255,0.4);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 0.7rem;
+    cursor: pointer;
+}
+
+.filter-btn.active {
+    background: var(--ncsea-light-green);
+    border-color: var(--ncsea-light-green);
+}
+
 #company-list {
     flex: 1;
     overflow-y: auto;
     background: var(--bg-light);
 }
 
-/* 4. Professional Company Cards */
+/* Logo and Card Layout */
 .company-card {
     background: var(--white);
     margin: 10px;
@@ -67,43 +83,32 @@ body {
     align-items: center;
     border: 1px solid #e0e4e8;
     cursor: pointer;
-    transition: 0.2s ease;
 }
 
-.company-card:hover {
-    border-color: var(--ncsea-blue);
-    transform: translateY(-2px);
-}
-
-/* THE FIX: Constraints for the logos */
 .company-logo {
     width: 60px;
     height: 60px;
-    object-fit: contain; /* Prevents stretching  */
+    object-fit: contain;
     margin-right: 15px;
-    flex-shrink: 0; /* Prevents logo from being squished by text */
-}
-
-.company-info h4 {
-    margin: 0;
-    color: var(--ncsea-dark-blue);
-    font-size: 1rem;
+    flex-shrink: 0;
 }
 
 .strategy-tag {
     display: inline-block;
-    font-size: 0.7rem;
+    font-size: 0.65rem;
     font-weight: bold;
     color: var(--ncsea-dark-blue);
     background: #edf2f7;
-    padding: 4px 8px;
+    padding: 3px 7px;
     border-radius: 4px;
     text-transform: uppercase;
-    margin-top: 6px;
+    margin-top: 5px;
 }
 
-/* 5. Map fills the remaining space */
+/* THE MAP: Must have flex: 1 and a z-index */
 #map {
     flex: 1;
     height: 100vh;
+    background: #e5e5e5; /* Shows gray while loading tiles */
+    z-index: 1;
 }
