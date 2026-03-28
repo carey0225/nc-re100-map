@@ -3,24 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NC RE100 Map</title>
+    <title>NC RE100 Company Map</title>
+
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
     <div id="sidebar">
-    <div class="sidebar-header">
-        <h2>NC RE100 Companies</h2>
-        <input type="text" id="search-bar" placeholder="Search companies..." />
-        <div id="filter-container"></div>
+        <div class="sidebar-header">
+            <h2>NC RE100 Companies</h2>
+            
+            <input type="text" id="search-bar" placeholder="Search companies..." />
+            
+            <div id="filter-container"></div>
+        </div>
+
+        <div id="company-list"></div>
     </div>
-    <div id="company-list"></div> 
-</div>
-</div>
-    
+
     <div id="map"></div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
     <script src="script.js"></script>
+
 </body>
 </html>
